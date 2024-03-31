@@ -1,3 +1,3 @@
 class Config:
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://username:password@localhost/database_name'
+    DATABASE = 'data.sqlite'
     SECRET_KEY = 'your_secret_key'

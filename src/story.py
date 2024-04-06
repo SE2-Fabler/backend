@@ -7,7 +7,7 @@ bp = Blueprint('story', __name__)
 def getStory():
     db = get_db()
     print(request.query_string)
-    query = 'SELECT s.id, title, name, created, genre, body, bookmarks, bookmarked FROM story s JOIN user u ON s.author_id = u.id'
+    query = 'SELECT s.id, title, name, author_id, created, genre, body, bookmarks, bookmarked FROM story s JOIN user u ON s.author_id = u.id'
     if(len(request.query_string)):
         title = request.args.get('title')
         id = request.args.get('id')

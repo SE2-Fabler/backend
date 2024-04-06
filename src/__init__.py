@@ -12,5 +12,6 @@ def create_app():
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(story.bp)
+    app.static_url_path = '/static'
 
     return app

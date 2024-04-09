@@ -3,6 +3,23 @@ from src.db import get_db
 
 bp = Blueprint('story', __name__)
 
+#helpers
+def dbQueryFollowing(uid, db):
+    query = 'SELECT DISTINCT u.id, name, email, username, about, location FROM follow f JOIN user u ON f.following_id = u.id WHERE' + (' f.user_id in ('+uid+')')
+    following = db.execute(query).fetchall()
+    out = []
+    for row in following:
+        out.append(list(row))
+    return out
+def dbAddFollowing(uid, fid, db):
+    query = 'INSERT INTO follow (user_id, following_id) VALUES (' + uid + ', ' + fid +')'
+    print(query)
+    db.execute(query)
+    db.commit()
+    return True
+def dbQueryCreations():
+    return
+
 @bp.route('/story')
 def getStory():
     db = get_db()
@@ -42,3 +59,17 @@ def getUser():
     for row in users:
         out.append(list(row))
     return out
+
+@bp.route('/user/following', methods=('GET', 'POST'))
+def getFollowing():
+    db = get_db()
+    if request.method == 'POST':
+        uid = request.form['uid']
+        fid = request.form['fid']
+        print(uid)
+        print(fid)
+        dbAddFollowing(uid, fid, db)
+        return "success"
+    id = request.args.get('id')
+    print(id)
+    return dbQueryFollowing(id, db)

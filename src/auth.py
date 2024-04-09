@@ -33,3 +33,40 @@ def login():
         return error
 
     return 
+
+@bp.route('/register', methods=('GET', 'POST'))
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+
+        db = get_db()
+        error = None
+        
+        if not username:
+            error = 'Username is required.'
+        elif not password:
+            error = 'Password is required.'
+
+        if error is None:
+            try:
+                db.execute(
+                    "INSERT INTO user (username, password, email) VALUES (?, ?, ?)",
+                    (username, password, email),
+                )
+                db.commit()
+            except db.IntegrityError:
+                error = f"User {username} is already registered."
+                return error
+            else:
+                user = db.execute(
+                    'SELECT id, name, email, username, about, location FROM user WHERE username = ?', (username,)
+                ).fetchone()
+                return list(user)
+        return error
+    return
+
+@bp.route('/logout')
+def logout():
+    session.clear()

@@ -70,3 +70,4 @@ def register():
 @bp.route('/logout')
 def logout():
     session.clear()
+    return "success"

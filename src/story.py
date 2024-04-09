@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, g, redirect, render_template, request, url_for
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for, session
 from src.db import get_db
 
 bp = Blueprint('story', __name__)
@@ -18,7 +18,7 @@ def dbAddFollowing(uid, fid, db):
     db.commit()
     return True
 def dbQueryBookmarks(uid, db):
-    query = 'SELECT DISTINCT s.id, title, name, author_id, created, genre, body, bookmarks, bookmarked FROM bookmark m JOIN story s ON m.book_id = s.id JOIN user u ON s.author_id = u.id WHERE' + (' m.user_id in ('+uid+')')
+    query = 'SELECT DISTINCT s.id, title, name, author_id, created, genre, body, bookmarks, bookmarked, private FROM bookmark m JOIN story s ON m.book_id = s.id JOIN user u ON s.author_id = u.id WHERE' + (' m.user_id in ('+uid+')')
     bookmarks = db.execute(query).fetchall()
     out = []
     for row in bookmarks:
@@ -84,7 +84,7 @@ def getStory():
         out.append(list(row))
     return out
 
-@bp.route('/story/bookmark', methods=('GET', 'POST'))
+@bp.route('/story/bookmark', methods=('GET', 'POST', 'DELETE'))
 def getBookmark():
     db = get_db()
     if request.method == 'POST':
@@ -94,6 +94,18 @@ def getBookmark():
         print(bid)
         dbAddBookmark(uid, bid, db)
         return "success"
+    elif request.method == 'DELETE':
+        print('delete bookmark')
+        id = request.args.get('id')
+        uid = session.get('user_id')
+        print(session.get('user_id'))
+        if (not session.get('user_id') is None):
+            query = 'DELETE FROM bookmark WHERE user_id = ' + str(uid) + ' AND book_id = ' + id
+            print(query)
+            db.execute(query)
+            db.commit()
+            return 'success'
+        return 'not logged in'
     id = request.args.get('id')
     print(id)
     return dbQueryBookmarks(id, db)
@@ -155,7 +167,7 @@ def getUser():
         out.append(list(row))
     return out
 
-@bp.route('/user/following', methods=('GET', 'POST'))
+@bp.route('/user/following', methods=('GET', 'POST', 'DELETE'))
 def getFollowing():
     db = get_db()
     if request.method == 'POST':
@@ -165,6 +177,18 @@ def getFollowing():
         print(fid)
         dbAddFollowing(uid, fid, db)
         return "success"
+    elif request.method == 'DELETE':
+        print('delete follow')
+        id = request.args.get('id')
+        uid = session.get('user_id')
+        print(session.get('user_id'))
+        if (not session.get('user_id') is None):
+            query = 'DELETE FROM follow WHERE user_id = ' + str(uid) + ' AND following_id = ' + id
+            print(query)
+            db.execute(query)
+            db.commit()
+            return 'success'
+        return 'not logged in'
     id = request.args.get('id')
     print(id)
     return dbQueryFollowing(id, db)

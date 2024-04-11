@@ -11,6 +11,13 @@ def dbQueryFollowing(uid, db):
     for row in following:
         out.append(list(row))
     return out
+def dbQueryFollowers(uid, db):
+    query = 'SELECT DISTINCT u.id, name, email, username, about, location FROM follow f JOIN user u ON f.user_id = u.id WHERE' + (' f.following_id_id in ('+uid+')')
+    following = db.execute(query).fetchall()
+    out = []
+    for row in following:
+        out.append(list(row))
+    return out
 def dbAddFollowing(uid, fid, db):
     query = 'INSERT INTO follow (user_id, following_id) VALUES (' + uid + ', ' + fid +')'
     print(query)
@@ -192,3 +199,10 @@ def getFollowing():
     id = request.args.get('id')
     print(id)
     return dbQueryFollowing(id, db)
+
+@bp.route('/user/followers')
+def getFollowers():
+    db = get_db()
+    id = request.args.get('id')
+    print(id)
+    return dbQueryFollowers(id, db)
